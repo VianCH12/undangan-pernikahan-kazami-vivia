@@ -456,6 +456,16 @@
         }
         .rsvp-form button:disabled { opacity: .7; cursor: wait; }
 
+        html.scroll-reveal-enabled .scroll-reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1);
+        }
+        html.scroll-reveal-enabled .scroll-reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         footer {
             padding: 28px 20px;
             text-align: center;
@@ -806,6 +816,26 @@
         }
         updateCountdown();
         setInterval(updateCountdown, 1000);
+
+        const revealTargets = document.querySelectorAll(
+            ".hero > div, main section .section-title, .intro-card > p, .couple, .event-card, .countdown > div, .location-box, .rsvp-form"
+        );
+        if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            document.documentElement.classList.add("scroll-reveal-enabled");
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("is-visible");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15, rootMargin: "0px 0px -32px 0px" });
+
+            revealTargets.forEach((element) => {
+                element.classList.add("scroll-reveal");
+                revealObserver.observe(element);
+            });
+        }
 
         const rsvpForm = document.getElementById("rsvpForm");
         const rsvpStatus = document.getElementById("rsvpStatus");
