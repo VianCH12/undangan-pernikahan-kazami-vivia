@@ -350,6 +350,57 @@
             line-height: 1;
         }
 
+        .gallery { background: var(--paper); }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: 1.15fr .85fr;
+            grid-template-rows: repeat(2, minmax(240px, 1fr));
+            gap: 18px;
+        }
+        .gallery-item {
+            position: relative;
+            min-height: 260px;
+            margin: 0;
+            overflow: hidden;
+            background: #e8dfd2;
+        }
+        .gallery-item:first-child { grid-row: span 2; }
+        .gallery-item:nth-child(4) {
+            grid-column: 1 / -1;
+            min-height: 250px;
+        }
+        .gallery-item img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            min-height: inherit;
+            object-fit: cover;
+            transition: transform .8s cubic-bezier(.2,.7,.2,1);
+        }
+        .gallery-item:hover img { transform: scale(1.045); }
+        .gallery-item figcaption {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 48px 22px 18px;
+            color: var(--white);
+            background: linear-gradient(transparent, rgba(38,30,26,.68));
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+        .gallery-item figcaption span {
+            color: #ead4ae;
+            font-size: 11px;
+            letter-spacing: 2px;
+        }
+        html.scroll-reveal-enabled .gallery-item:nth-child(2) { transition-delay: .1s; }
+        html.scroll-reveal-enabled .gallery-item:nth-child(3) { transition-delay: .2s; }
+        html.scroll-reveal-enabled .gallery-item:nth-child(4) { transition-delay: .1s; }
+
         .intro { background: var(--white); }
         .intro-card {
             max-width: 680px;
@@ -494,6 +545,20 @@
             .section-title { margin-bottom: 32px; }
             .section-title p { font-size: 10px; letter-spacing: 2.5px; }
             .section-title h2 { font-size: clamp(38px, 10vw, 52px); }
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: none;
+                gap: 14px;
+            }
+            .gallery-item,
+            .gallery-item:first-child,
+            .gallery-item:nth-child(4) {
+                grid-column: auto;
+                grid-row: auto;
+                min-height: 270px;
+            }
+            .gallery-item:first-child { min-height: 360px; }
+            .gallery-item figcaption { padding: 42px 16px 14px; }
             .couple {
                 grid-template-columns: 1fr;
                 gap: 20px;
@@ -523,6 +588,11 @@
             .cover .eyebrow { letter-spacing: 2.5px; }
             .hero h2 { font-size: 52px; }
             .section-title p { letter-spacing: 1.5px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .gallery-item img { transition: none; }
+            .gallery-item:hover img { transform: none; }
         }
     </style>
 </head>
@@ -563,6 +633,7 @@
                 <li><a href="#home">Beranda</a></li>
                 <li><a href="#mempelai">Mempelai</a></li>
                 <li><a href="#acara">Acara</a></li>
+                <li><a href="#galeri">Galeri</a></li>
                 <li><a href="#countdown">Hitung Mundur</a></li>
                 <li><a href="#lokasi">Lokasi</a></li>
                 <li><a href="#rsvp">RSVP</a></li>
@@ -619,6 +690,33 @@
                         <div class="time">11.00 - 14.00 WIB</div>
                         <p>Minggu, 27 Desember 2026<br>Marilyn Hotel Serpong<br>Jl. Raya Serpong Kilometer 7 No.1, Pakulonan, Kec. Serpong Utara, Kota Tangerang Selatan, Banten 15325</p>
                     </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="gallery" id="galeri">
+            <div class="container">
+                <div class="section-title">
+                    <p>Potret Kebersamaan</p>
+                    <h2>Cerita Kami</h2>
+                </div>
+                <div class="gallery-grid">
+                    <figure class="gallery-item">
+                        <img src="assets/galeri-01.jpg" alt="Pasangan berjalan bersama di pantai saat matahari terbenam" loading="lazy" decoding="async">
+                        <figcaption><span>01</span> Hari yang istimewa</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="assets/galeri-02.jpg" alt="Pasangan pengantin berciuman di bawah veil di tengah hutan" loading="lazy" decoding="async">
+                        <figcaption><span>02</span> Awal perjalanan</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="assets/galeri-03.jpg" alt="Pasangan pengantin berjalan bersama di jalan setapak saat senja" loading="lazy" decoding="async">
+                        <figcaption><span>03</span> Detail penuh cinta</figcaption>
+                    </figure>
+                    <figure class="gallery-item">
+                        <img src="assets/galeri-04.jpg" alt="Siluet pasangan pengantin berdansa dengan latar cahaya senja" loading="lazy" decoding="async">
+                        <figcaption><span>04</span> Kenangan selamanya</figcaption>
+                    </figure>
                 </div>
             </div>
         </section>
@@ -818,7 +916,7 @@
         setInterval(updateCountdown, 1000);
 
         const revealTargets = document.querySelectorAll(
-            ".hero > div, main section .section-title, .intro-card > p, .couple, .event-card, .countdown > div, .location-box, .rsvp-form"
+            ".hero > div, main section .section-title, .intro-card > p, .couple, .event-card, .gallery-item, .countdown > div, .location-box, .rsvp-form"
         );
         if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
             document.documentElement.classList.add("scroll-reveal-enabled");
