@@ -480,6 +480,66 @@
         .location-box p { color: #75675e; line-height: 1.8; }
         .btn-brown { margin-top: 12px; color: var(--white); background: var(--brown); }
 
+        .gift { background: #ece3d3; text-align: center; }
+        .gift-card {
+            max-width: 560px;
+            margin: auto;
+            border: 1px solid #ded2bc;
+            padding: 36px 28px;
+            background: var(--paper);
+            box-shadow: 0 12px 32px rgba(64,51,45,.08);
+        }
+        .gift-card .gift-icon { margin: 0; color: var(--gold); font-size: 26px; }
+        .gift-card h3 { margin: 8px 0 4px; font-size: 34px; }
+        .gift-card .gift-owner { margin: 0; color: #75675e; font-size: 13px; }
+        .gift-account {
+            display: grid;
+            gap: 6px;
+            margin: 24px 0 16px;
+            border-top: 1px solid #e7dcc9;
+            border-bottom: 1px solid #e7dcc9;
+            padding: 16px;
+        }
+        .gift-account span { color: #75675e; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; }
+        .gift-account strong {
+            color: var(--brown-dark);
+            font: 600 clamp(24px, 6vw, 32px)/1.2 "DM Sans", sans-serif;
+            letter-spacing: 2px;
+        }
+        .copy-button {
+            min-height: 44px;
+            border: 0;
+            border-radius: 999px;
+            padding: 12px 20px;
+            color: var(--white);
+            background: var(--brown);
+            font: 600 12px "DM Sans", sans-serif;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background .2s, transform .2s;
+        }
+        .copy-button:hover { transform: translateY(-2px); background: var(--brown-dark); }
+        .copy-button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+        .copy-toast {
+            position: fixed;
+            right: 16px;
+            bottom: 84px;
+            z-index: 40;
+            max-width: calc(100vw - 32px);
+            border: 1px solid rgba(255,255,255,.75);
+            border-radius: 999px;
+            padding: 13px 18px;
+            color: var(--white);
+            background: var(--brown-dark);
+            box-shadow: 0 8px 28px rgba(64,51,45,.2);
+            font-size: 13px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity .2s ease, transform .2s ease;
+        }
+        .copy-toast.is-visible { opacity: 1; transform: translateY(0); }
+        .copy-toast.is-error { background: #7a332c; }
+
         .rsvp { background: var(--sage); color: var(--white); }
         .rsvp .section-title p { color: #f1e8d6; }
         .rsvp-form {
@@ -593,6 +653,9 @@
         @media (prefers-reduced-motion: reduce) {
             .gallery-item img { transition: none; }
             .gallery-item:hover img { transform: none; }
+            .copy-button { transition: none; }
+            .copy-button:hover { transform: none; }
+            .copy-toast { transition: none; }
         }
     </style>
 </head>
@@ -636,6 +699,7 @@
                 <li><a href="#galeri">Galeri</a></li>
                 <li><a href="#countdown">Hitung Mundur</a></li>
                 <li><a href="#lokasi">Lokasi</a></li>
+                <li><a href="#hadiah">Hadiah</a></li>
                 <li><a href="#rsvp">RSVP</a></li>
             </ul>
         </div>
@@ -745,6 +809,25 @@
             </div>
         </section>
 
+        <section class="gift" id="hadiah">
+            <div class="container">
+                <div class="section-title">
+                    <p>Tanda Kasih</p>
+                    <h2>Kirim Hadiah</h2>
+                </div>
+                <div class="gift-card">
+                    <p class="gift-icon" aria-hidden="true">♡</p>
+                    <h3>Bank BCA</h3>
+                    <p class="gift-owner">a.n. Kazami</p>
+                    <p class="gift-account">
+                        <span>Nomor Rekening</span>
+                        <strong>08775544</strong>
+                    </p>
+                    <button class="copy-button" id="copyAccountButton" type="button" data-copy-text="08775544">SALIN NOMOR REKENING</button>
+                </div>
+            </div>
+        </section>
+
         <section class="rsvp" id="rsvp">
             <div class="container">
                 <div class="section-title">
@@ -770,6 +853,7 @@
     <footer>
         Made with love for <span>Kazami & Vivia</span>
     </footer>
+    <div class="copy-toast" id="copyToast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
 
     <script type="module">
         import { createSupabaseClient } from "./assets/supabase-client.js";
@@ -916,7 +1000,7 @@
         setInterval(updateCountdown, 1000);
 
         const revealTargets = document.querySelectorAll(
-            ".hero > div, main section .section-title, .intro-card > p, .couple, .event-card, .gallery-item, .countdown > div, .location-box, .rsvp-form"
+            ".hero > div, main section .section-title, .intro-card > p, .couple, .event-card, .gallery-item, .countdown > div, .location-box, .gift-card, .rsvp-form"
         );
         if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
             document.documentElement.classList.add("scroll-reveal-enabled");
@@ -934,6 +1018,57 @@
                 revealObserver.observe(element);
             });
         }
+
+        const copyAccountButton = document.getElementById("copyAccountButton");
+        const copyToast = document.getElementById("copyToast");
+        let copyToastTimer;
+
+        function showCopyToast(message, isError = false) {
+            copyToast.textContent = message;
+            copyToast.classList.toggle("is-error", isError);
+            copyToast.hidden = false;
+            copyToast.classList.remove("is-visible");
+            requestAnimationFrame(() => copyToast.classList.add("is-visible"));
+            clearTimeout(copyToastTimer);
+            copyToastTimer = setTimeout(() => {
+                copyToast.classList.remove("is-visible");
+                copyToast.hidden = true;
+            }, 2800);
+        }
+
+        async function copyTextToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+                return;
+            }
+
+            const temporaryInput = document.createElement("textarea");
+            temporaryInput.value = text;
+            temporaryInput.setAttribute("readonly", "");
+            temporaryInput.style.position = "fixed";
+            temporaryInput.style.opacity = "0";
+            document.body.append(temporaryInput);
+            temporaryInput.select();
+            let copied;
+            try {
+                copied = document.execCommand("copy");
+            } finally {
+                temporaryInput.remove();
+            }
+            if (!copied) {
+                throw new Error("Browser tidak dapat menyalin teks ke clipboard.");
+            }
+        }
+
+        copyAccountButton.addEventListener("click", async () => {
+            try {
+                await copyTextToClipboard(copyAccountButton.dataset.copyText);
+                showCopyToast("Nomor rekening berhasil disalin.");
+            } catch (error) {
+                console.error("Nomor rekening gagal disalin.", error);
+                showCopyToast("Gagal menyalin nomor rekening. Silakan salin secara manual.", true);
+            }
+        });
 
         const rsvpForm = document.getElementById("rsvpForm");
         const rsvpStatus = document.getElementById("rsvpStatus");
