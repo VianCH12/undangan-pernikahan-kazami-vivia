@@ -843,7 +843,7 @@
                         <option value="tidak-hadir">Maaf, saya tidak bisa hadir</option>
                     </select>
                     <textarea name="message" placeholder="Ucapan dan doa untuk kedua mempelai"></textarea>
-                    <button class="btn btn-light" type="submit">KIRIM KONFIRMASI</button>
+                    <button class="btn btn-light" type="submit">KONFIRMASI VIA WHATSAPP</button>
                     <p class="rsvp-status" id="rsvpStatus" role="status" aria-live="polite"></p>
                 </form>
             </div>
@@ -1072,6 +1072,7 @@
 
         const rsvpForm = document.getElementById("rsvpForm");
         const rsvpStatus = document.getElementById("rsvpStatus");
+        const whatsappNumber = "62085711366593";
         rsvpForm.addEventListener("submit", async (event) => {
             event.preventDefault();
             const submitButton = rsvpForm.querySelector('button[type="submit"]');
@@ -1110,8 +1111,18 @@
                 if (typeof result !== "string") {
                     throw new Error("Respons Supabase tidak valid.");
                 }
-                rsvpStatus.textContent = result;
-                rsvpForm.reset();
+                const attendance = fields.get("attendance");
+                const attendanceLabel = attendance === "hadir" ? "Hadir" : "Tidak dapat hadir";
+                const guestMessage = String(fields.get("message") || "").trim();
+                const whatsappMessage = [
+                    "Halo, saya ingin mengonfirmasi kehadiran di pernikahan Kazami & Vivia.",
+                    `Nama: ${String(fields.get("name") || "").trim()}`,
+                    `Konfirmasi: ${attendanceLabel}`,
+                    ...(guestMessage ? [`Ucapan: ${guestMessage}`] : [])
+                ].join("\n");
+                const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+                rsvpStatus.textContent = "RSVP berhasil disimpan. Mengarahkan ke WhatsApp...";
+                window.location.assign(whatsappUrl);
             } catch (error) {
                 console.error("Gagal mengirim RSVP.", error);
                 rsvpStatus.textContent = error instanceof TypeError
