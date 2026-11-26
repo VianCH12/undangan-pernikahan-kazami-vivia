@@ -15,7 +15,7 @@
             --brown: #5f4b42;
             --brown-dark: #40332d;
             --gold: #bd9a67;
-            --sage: #9eaa91;
+            --deep-hookers-green: #355e3b;
             --white: #fff;
         }
 
@@ -624,9 +624,9 @@
         .rsvp {
             color: var(--white);
             background:
-                radial-gradient(circle at 12% 18%, rgba(255,255,255,.24), transparent 30%),
-                radial-gradient(circle at 88% 82%, rgba(64,51,45,.16), transparent 34%),
-                var(--sage);
+                radial-gradient(circle at 12% 18%, rgba(220,237,222,.2), transparent 30%),
+                radial-gradient(circle at 88% 82%, rgba(20,34,25,.24), transparent 34%),
+                var(--deep-hookers-green);
         }
         .rsvp .section-title p { color: #f1e8d6; }
         .rsvp-form {
@@ -1151,14 +1151,13 @@
 
         playBackgroundMusic();
 
-        function startFallingLeaves() {
+        function startFallingLeaves(count = 18) {
             if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
                 return;
             }
 
             const leafColors = ["#bd9a67", "#a77b51", "#9eaa91", "#d2ad78", "#8b7153"];
-            fallingLeaves.replaceChildren();
-            for (let index = 0; index < 18; index += 1) {
+            for (let index = 0; index < count; index += 1) {
                 const leaf = document.createElement("span");
                 leaf.className = "falling-leaf";
                 leaf.style.left = `${Math.random() * 100}%`;
@@ -1168,13 +1167,15 @@
                 leaf.style.setProperty("--leaf-drift", `${Math.round(Math.random() * 100 - 50)}px`);
                 leaf.style.setProperty("--leaf-mid-turn", `${Math.round(Math.random() * 240 - 120)}deg`);
                 leaf.style.setProperty("--leaf-end-turn", `${Math.round(Math.random() * 720 - 360)}deg`);
+                leaf.addEventListener("animationend", () => {
+                    leaf.remove();
+                    if (!fallingLeaves.childElementCount) {
+                        fallingLeaves.classList.remove("is-active");
+                    }
+                }, { once: true });
                 fallingLeaves.append(leaf);
             }
             fallingLeaves.classList.add("is-active");
-            window.setTimeout(() => {
-                fallingLeaves.classList.remove("is-active");
-                fallingLeaves.replaceChildren();
-            }, 12000);
         }
 
         document.getElementById("openInvitation").addEventListener("click", () => {
@@ -1184,6 +1185,20 @@
             musicPlayer.hidden = false;
             playBackgroundMusic();
         });
+
+        let lastScrollLeavesAt = 0;
+        window.addEventListener("scroll", () => {
+            if (document.body.classList.contains("cover-open")) {
+                return;
+            }
+
+            const now = Date.now();
+            if (now - lastScrollLeavesAt < 900) {
+                return;
+            }
+            lastScrollLeavesAt = now;
+            startFallingLeaves(2);
+        }, { passive: true });
 
         const navToggle = document.getElementById("navToggle");
         const navLinks = document.getElementById("navLinks");
